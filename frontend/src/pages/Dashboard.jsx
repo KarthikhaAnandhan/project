@@ -1,9 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
+  const navigate = useNavigate();
+
   const [balance, setBalance] = useState(0);
   const [amount, setAmount] = useState("");
   const [transactions, setTransactions] = useState([]);
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+
+    if (!user) {
+      navigate("/");
+    }
+  }, [navigate]);
+
+  const logout = () => {
+    localStorage.removeItem("user");
+    navigate("/");
+  };
 
   const addTransaction = (type, value) => {
     setTransactions([
@@ -47,35 +63,22 @@ function Dashboard() {
     setAmount("");
   };
 
-  const transferMoney = () => {
-    const value = Number(amount);
-
-    if (value <= 0) {
-      alert("Enter valid amount");
-      return;
-    }
-
-    if (value > balance) {
-      alert("Insufficient Balance");
-      return;
-    }
-
-    setBalance(balance - value);
-    addTransaction("Transfer", value);
-    setAmount("");
-  };
-
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-blue-600 text-white p-4 flex justify-between">
-        <h1 className="text-2xl font-bold">ATM Dashboard</h1>
-        <button className="bg-red-500 px-4 py-2 rounded">
+        <h1 className="text-2xl font-bold">
+          ATM Dashboard
+        </h1>
+
+        <button
+          onClick={logout}
+          className="bg-red-500 px-4 py-2 rounded"
+        >
           Logout
         </button>
       </nav>
 
       <div className="max-w-5xl mx-auto p-6">
-
         <div className="bg-white rounded-xl shadow p-6 mb-6">
           <h2 className="text-xl font-semibold">
             Available Balance
@@ -96,8 +99,7 @@ function Dashboard() {
           />
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5">
-
+        <div className="grid md:grid-cols-2 gap-5">
           <button
             onClick={depositMoney}
             className="bg-green-500 text-white p-4 rounded-xl"
@@ -111,18 +113,9 @@ function Dashboard() {
           >
             Withdraw
           </button>
-
-          <button
-            onClick={transferMoney}
-            className="bg-blue-500 text-white p-4 rounded-xl"
-          >
-            Transfer
-          </button>
-
         </div>
 
         <div className="bg-white mt-8 p-6 rounded-xl shadow">
-
           <h2 className="text-2xl font-bold mb-4">
             Transaction History
           </h2>
@@ -139,19 +132,17 @@ function Dashboard() {
                   <p className="font-semibold">
                     {item.type}
                   </p>
+
                   <p className="text-sm text-gray-500">
                     {item.time}
                   </p>
                 </div>
 
-                <p>
-                  ₹ {item.amount}
-                </p>
+                <p>₹ {item.amount}</p>
               </div>
             ))
           )}
         </div>
-
       </div>
     </div>
   );

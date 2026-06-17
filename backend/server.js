@@ -12,10 +12,18 @@ app.use(express.json());
 
 mongoose
   .connect(process.env.MONGODB_URL)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
+  .then(() => {
+    console.log("MongoDB Connected");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 app.use("/api", authRoutes);
+
+app.get("/", (req, res) => {
+  res.send("Backend Running");
+});
 
 app.listen(process.env.PORT, () => {
   console.log(

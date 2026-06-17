@@ -1,47 +1,89 @@
 const User = require("../models/User");
-const bcrypt = require("bcryptjs");
 
-exports.signup = async (req, res) => {
+const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const {
+      name,
+      accountNumber,
+      username,
+      pin,
+    } = req.body;
 
-    const hash = await bcrypt.hash(password, 10);
+    if (
+      !name ||
+      !accountNumber ||
+      !username ||
+      !pin
+    ) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
+
+    const existingUser = await User.findOne({
+      $or: [
+        { username },
+        { accountNumber },
+      ],
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message:
+          "Username or Account Number already exists",
+      });
+    }
 
     const user = await User.create({
       name,
-      email,
-      password: hash,
+      accountNumber,
+      username,
+      pin,
+      balance: 0,
     });
 
-    res.status(201).json(user);
-  } catch (err) {
-    res.status(500).json(err);
+    res.status(201).json({
+      message: "Account created successfully",
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, pin } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      username,
+      pin,
+    });
 
-    if (!user)
-      return res.status(404).json({
-        message: "User not found",
-      });
-
-    const match = await bcrypt.compare(
-      password,
-      user.password
-    );
-
-    if (!match)
+    if (!user) {
       return res.status(400).json({
-        message: "Invalid password",
+        message: "Invalid Username or PIN",
       });
+    }
 
-    res.json(user);
-  } catch (err) {
-    res.status(500).json(err);
+    res.status(200).json({
+      message: "Login successful",
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
   }
+};
+
+module.exports = {
+  signup,
+  login,
 };

@@ -1,69 +1,117 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import API from "../services/api";
 
 function Signup() {
-
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
     name: "",
+    accountNumber: "",
     username: "",
     pin: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    navigate("/");
+    try {
+      const res = await API.post(
+        "/signup",
+        form
+      );
+
+      alert(res.data.message);
+
+      navigate("/");
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+          "Signup Failed"
+      );
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex justify-center items-center">
+    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+      <div className="bg-white p-8 rounded-xl shadow w-96">
 
-      <div className="w-full max-w-md bg-slate-900 p-8 rounded-3xl shadow-2xl">
-
-        <h1 className="text-4xl text-center font-bold text-white mb-8">
-          Open Account
+        <h1 className="text-3xl font-bold text-center mb-6">
+          Create Account
         </h1>
 
         <form onSubmit={handleSubmit}>
 
           <input
+            type="text"
             placeholder="Full Name"
-            className="w-full p-4 rounded-xl bg-slate-800 text-white mb-4"
+            value={form.name}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                name: e.target.value,
+              })
+            }
+            className="border p-3 w-full mb-3 rounded"
           />
 
           <input
+            type="text"
+            placeholder="Account Number"
+            value={form.accountNumber}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                accountNumber: e.target.value,
+              })
+            }
+            className="border p-3 w-full mb-3 rounded"
+          />
+
+          <input
+            type="text"
             placeholder="Username"
-            className="w-full p-4 rounded-xl bg-slate-800 text-white mb-4"
+            value={form.username}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                username: e.target.value,
+              })
+            }
+            className="border p-3 w-full mb-3 rounded"
           />
 
           <input
-            placeholder="4 Digit PIN"
+            type="password"
             maxLength={4}
-            className="w-full p-4 rounded-xl bg-slate-800 text-white mb-6"
+            placeholder="4 Digit PIN"
+            value={form.pin}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                pin: e.target.value,
+              })
+            }
+            className="border p-3 w-full mb-3 rounded"
           />
 
-          <button
-            className="w-full bg-blue-500 p-4 rounded-xl text-white font-bold"
-          >
+          <button className="bg-blue-500 text-white w-full p-3 rounded">
             Create Account
           </button>
 
         </form>
 
-        <p className="text-center mt-5 text-slate-400">
-          Already have an account?{" "}
+        <p className="mt-4 text-center">
+          Already have account?
           <Link
             to="/"
-            className="text-blue-400"
+            className="text-blue-500 ml-2"
           >
             Login
           </Link>
         </p>
 
       </div>
-
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import API from "../services/api";
 
 function Login() {
   const navigate = useNavigate();
@@ -9,32 +10,39 @@ function Login() {
     pin: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.username || !form.pin) {
-      alert("Enter Username and PIN");
-      return;
-    }
+    try {
+      const res = await API.post(
+        "/login",
+        form
+      );
 
-    navigate("/dashboard");
+      localStorage.setItem(
+        "user",
+        JSON.stringify(res.data.user)
+      );
+
+      alert("Login Successful");
+
+      navigate("/dashboard");
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+          "Login Failed"
+      );
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex justify-center items-center">
-      <div className="w-full max-w-md bg-slate-900 p-8 rounded-3xl shadow-2xl border border-slate-800">
-
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white">
-            Secure ATM
-          </h1>
-          <p className="text-slate-400 mt-2">
-            Login to your account
-          </p>
-        </div>
+    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+      <div className="bg-white p-8 rounded-xl shadow w-96">
+        <h1 className="text-3xl font-bold text-center mb-6">
+          ATM Login
+        </h1>
 
         <form onSubmit={handleSubmit}>
-
           <input
             type="text"
             placeholder="Username"
@@ -45,13 +53,13 @@ function Login() {
                 username: e.target.value,
               })
             }
-            className="w-full p-4 rounded-xl bg-slate-800 text-white mb-4 outline-none"
+            className="border p-3 w-full mb-3 rounded"
           />
 
           <input
             type="password"
             maxLength={4}
-            placeholder="4 Digit PIN"
+            placeholder="PIN"
             value={form.pin}
             onChange={(e) =>
               setForm({
@@ -59,27 +67,23 @@ function Login() {
                 pin: e.target.value,
               })
             }
-            className="w-full p-4 rounded-xl bg-slate-800 text-white mb-6 outline-none"
+            className="border p-3 w-full mb-3 rounded"
           />
 
-          <button
-            className="w-full bg-emerald-500 hover:bg-emerald-600 transition p-4 rounded-xl text-white font-bold"
-          >
+          <button className="bg-green-500 text-white w-full p-3 rounded">
             Login
           </button>
-
         </form>
 
-        <p className="text-center text-slate-400 mt-6">
-          New Customer?{" "}
+        <p className="mt-4 text-center">
+          New User?
           <Link
             to="/signup"
-            className="text-emerald-400"
+            className="text-green-500 ml-2"
           >
             Create Account
           </Link>
         </p>
-
       </div>
     </div>
   );
